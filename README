@@ -1,0 +1,94 @@
+/* 
+    A Better Form - A jQuery Plugin
+    ==================================================================
+    ©2010 JasonLau.biz
+    ==================================================================
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+Complete documentation for this plugin can be found at http://jasonlau.biz/home/a-better-form-a-jquery-plugin .
+
+Below is a complete list of A Better Form's options and default values -
+
+ajax_form : false,
+attributes : 'action="#" method="POST"',
+clickonce : true,
+convert : false,
+cookie_field : 'abcookie',
+cookie_name : randomString(5),
+custom_classes : false,
+filtertext : true,
+form_id : randomString(10),
+hover_enable : false,
+html : '',
+invalid_alert : true,
+json : false,
+json_form : false,
+multipart : false,
+pluggable : false,
+require_cookies : true,
+sequential_disable : true,              
+serialized : true,
+submit_class : 'absubmit',
+textfilters : 'url=,link=,http:,www.,href,<a',
+alert_invalid_email : 'Invalid email!',
+alert_invalid_url : 'Invalid URL address!',
+alert_required_field : 'Field is required!',
+alert_invalid_length : 'Field must be at least $ characters in length!',
+alert_invalid_content : 'Invalid field content!',
+alert_invalid_characters_numbers : 'Field accepts numbers only!',
+alert_invalid_characters_letters : 'Field accepts letters only!',
+alert_invalid_characters : 'Field accepts letters and numbers only!',
+alert_invalid_username : 'Field accepts letters, numbers, and underscores only!',
+alert_failed_test : 'Field does not accept the following characters $',
+alert_special_chars : 'Special characters were automatically removed. Try again.',
+authorization_required : 'Authorization required!',
+cookies_required : 'Browser cookies must be enabled to use this form.'
+
+Example use -
+
+<script type="text/javascript" src="jquery-latest.js"></script> 
+<script type="text/javascript" src="abetterform-latest.js"></script>
+<script type="text/javascript">
+    var myFunction = function(serialized){
+        alert(serialized);
+    }
+    
+	jQuery(document).ready(function () {
+	   $("#myform").abform({
+	       pluggable : myFunction,
+           serialized : true,
+           clickonce : true,
+           convert : '{mytext|text|class="abnospecial"}{myradio1|radio|rel="myradio"}{myradio2|radio|rel="myradio"}{myradio3|radio|rel="myradio"}{mycheckbox1|checkbox|rel="mycheckbox[]" class="abcheckall"}{mycheckbox2|checkbox|rel="mycheckbox[]"}{mycheckbox3|checkbox|rel="mycheckbox[]"}{mybutton|button|class="absubmit"}'
+	   });    
+    });
+        
+</script>
+<style type="text/css">
+<!--
+	.aberror{
+	   background-color: #FFFF99;
+       border: 1px solid red;
+	}
+-->
+</style>
+
+<div id="myform">
+<strong>Text:</strong> <div id="mytext"></div><br />
+
+Radio: 1<div id="myradio1">1</div> 2<div id="myradio2">2</div> 3<div id="myradio3">3</div><br />
+Checkbox: 1<div id="mycheckbox1">1</div> 2<div id="mycheckbox2">2</div> 3<div id="mycheckbox3">3</div><br />
+
+<div id="mybutton">Submit</div>
+</div>
