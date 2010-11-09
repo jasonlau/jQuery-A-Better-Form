@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010 JasonLau.biz - Version 1.1.7
+    Â©2010 JasonLau.biz - Version 1.1.8
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -320,8 +320,11 @@
                     $(this).select().focus();
                 });
                
-                $('#' + id + ' .' + options.submit_class).mousedown(function(){
-                    if(!$('#' + id + ' .' + auth_f).val()){
+                $('#' + id + ' .' + options.submit_class).mousedown(function(e){
+                    var pos = $(this).position(),
+                    right = pos.left+$(this).outerWidth(),
+                    bottom = pos.top+$(this).outerHeight();                   
+                    if(!$('#' + id + ' .' + auth_f).val() && (e.pageX > pos.left && e.pageX < right) && (e.pageY > pos.top && e.pageY < bottom)){
                         obj.append('<input type="hidden" id="' + auth_f + '" class="' + auth_f + '" value="' + auth_c + '" />');
                     }                    
                 });
