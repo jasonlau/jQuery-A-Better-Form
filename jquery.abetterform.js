@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010 JasonLau.biz - Version 1.1.8
+    ©2010 JasonLau.biz - Version 1.1.9
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -246,8 +246,8 @@
                         });
                     }
                     
-                    if($(this).is('input, textarea') && !$(this).is('input:file') && !$(this).is('input:radio') && !$(this).is('input:checkbox')){
-                        
+                    if($(this).is('input:text, textarea')){
+                        $(this).attr('name',$(this).attr('id'));
                         $(this).bind('keyup change',function(){
                             
                             if($(this).val() != ''){
@@ -269,13 +269,8 @@
                                     
                                 }
                                                                 
-                                $('#' + all_ids[next_item]).attr('disabled', '');
-                                $(this).attr('name',$(this).attr('id')); 
+                                $('#' + all_ids[next_item]).attr('disabled', ''); 
                                 
-                            } else {
-                                
-                                $(this).attr('name','');
-                                                                 
                             }
                             
                             if(options.sequential_disable){ seq_dis(id, all_ids); } 
