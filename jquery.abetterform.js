@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010 JasonLau.biz - Version 1.2.0
+    ©2010 JasonLau.biz - Version 1.2.1
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -246,7 +246,7 @@
                         });
                     }
                     
-                    if($(this).is('input:text, input:password, input:file, textarea')){
+                    if($(this).is('input:text, input:password, input:file, input:hidden, textarea')){
                         $(this).attr('name',$(this).attr('id'));
                         $(this).bind('keyup change',function(){
                             
