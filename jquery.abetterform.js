@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010 JasonLau.biz - Version 1.2.1
+    ©2010 JasonLau.biz - Version 1.2.2
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,43 +25,44 @@
  	  
  		abform: function(options){
  		 
-			var defaults = {
-			 
-			    ajax_form : false,
-                attributes : 'action="#" method="POST"',
-                clickonce : true,
-                convert : false,
-                cookie_field : 'abcookie',
-                cookie_name : randomString(5),
-                custom_classes : false,
-                filtertext : true,
-                form_id : randomString(10),
-                hover_enable : false,
-                html : '',
-                invalid_alert : true,
-                json : false,
-                json_form : false,
-                multipart : false,
-                pluggable : false,
-                require_cookies : true,
-                sequential_disable : true,              
-                serialized : true,
-                submit_class : 'absubmit',
-                textfilters : 'url=,link=,http:,www.,href,<a',
-                alert_invalid_email : 'Invalid email!',
-                alert_invalid_url : 'Invalid URL address!',
-                alert_required_field : 'Field is required!',
-                alert_invalid_length : 'Field must be at least $ characters in length!',
-                alert_invalid_content : 'Invalid field content!',
-                alert_invalid_characters_numbers : 'Field accepts numbers only!',
-                alert_invalid_characters_letters : 'Field accepts letters only!',
-                alert_invalid_characters : 'Field accepts letters and numbers only!',
-                alert_invalid_username : 'Field accepts letters, numbers, and underscores only!',
-                alert_failed_test : 'Field does not accept the following characters $',
-                alert_special_chars : 'Special characters were automatically removed. Try again.',
-                authorization_required : 'Authorization required!',
-                cookies_required : 'Browser cookies must be enabled to use this form.'                                  
-			}
+          var defaults = {
+            
+            ajax_form : false,
+            attributes : 'action="#" method="POST"',
+            clickonce : true,
+            convert : false,
+            cookie_field : 'abcookie',
+            cookie_name : randomString(5),
+            custom_classes : false,
+            filtertext : true,
+            form_id : randomString(10),
+            hover_enable : false,
+            html : '',
+            invalid_alert : true,
+            json : false,
+            json_form : false,
+            multipart : false,
+            pluggable : false,
+            require_cookies : true,
+            sequential_disable : true,              
+            serialized : true,
+            submit_class : 'absubmit',
+            textfilters : 'url=,link=,http:,www.,href,<a',
+            alert_invalid_email : 'Invalid email!',
+            alert_invalid_url : 'Invalid URL address!',
+            alert_required_field : 'Field is required!',
+            alert_invalid_length : 'Field must be at least $ characters in length!',
+            alert_invalid_content : 'Invalid field content!',
+            alert_invalid_characters_numbers : 'Field accepts numbers only!',
+            alert_invalid_characters_letters : 'Field accepts letters only!',
+            alert_invalid_characters : 'Field accepts letters and numbers only!',
+            alert_invalid_username : 'Field accepts letters, numbers, and underscores only!',
+            alert_failed_test : 'Field does not accept the following characters $',
+            alert_special_chars : 'Special characters were automatically removed. Try again.',
+            authorization_required : 'Authorization required!',
+            cookies_required : 'Browser cookies must be enabled to use this form.'
+            
+          }
             				
 			var options = $.extend(defaults, options), obj = $(this), id = obj.attr('id'), auth_f = randomString(Math.random()*20), auth_c = randomString(Math.random()*20);
             if(options.require_cookies){  
@@ -158,17 +159,23 @@
                         case 'select':                        
                         newElement = '<select id="' + e_id + '"' + e_attributes + '>';
                         $("#" + e_id + " ul").each(function(){
-                            if($(this).attr('rel')){
-                              newElement += '<optgroup label="' + $(this).attr('title') + '">';  
-                            }                       
                             
-                        $("#" + e_id + " ul li").each(function(){
-                            newElement += '<option value="' + $(this).attr('rel') + '">' + $(this).html() + '</option>'; 
-                        });
-                        
-                        if($(this).attr('rel')){
-                              newElement += '</optgroup>';  
+                            $(this).attr('id','ab-select');
+                            
+                            if($(this).attr('rel')){
+                              newElement += '<optgroup label="' + $(this).attr('rel') + '">';  
                             }
+                            
+                            $("#ab-select li").each(function(){
+                                newElement += '<option value="' + $(this).attr('rel') + '">' + $(this).html() + '</option>';
+                            });
+                            
+                            if($(this).attr('rel')){
+                                newElement += '</optgroup>';
+                            }
+                            
+                            $(this).attr('id','');
+                            
                         });
                         newElement += '</select>'; 
                         
