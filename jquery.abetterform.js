@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010 JasonLau.biz - Version 1.2.2
+    ©2010 JasonLau.biz - Version 1.2.3
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,17 +24,20 @@
  	$.fn.extend({ 
  	  
  		abform: function(options){
- 		 
           var defaults = {
             
             ajax_form : false,
+            alert_type : 'js', // 1.2.3 - js or html
             attributes : 'action="#" method="POST"',
             clickonce : true,
             convert : false,
             cookie_field : 'abcookie',
             cookie_name : randomString(5),
             custom_classes : false,
+            debug : false, // 1.2.3
+            error_class: 'aberror ui-state-error', // 1.2.3
             filtertext : true,
+            form_expires : 0, // 1.2.3
             form_id : randomString(10),
             hover_enable : false,
             html : '',
@@ -43,11 +46,13 @@
             json_form : false,
             multipart : false,
             pluggable : false,
+            refresh_expired : false, // 1.2.3
             require_cookies : true,
             sequential_disable : true,              
             serialized : true,
             submit_class : 'absubmit',
             textfilters : 'url=,link=,http:,www.,href,<a',
+            validator_class : 'abvalidate', // 1.2.3
             alert_invalid_email : 'Invalid email!',
             alert_invalid_url : 'Invalid URL address!',
             alert_required_field : 'Field is required!',
@@ -58,13 +63,16 @@
             alert_invalid_characters : 'Field accepts letters and numbers only!',
             alert_invalid_username : 'Field accepts letters, numbers, and underscores only!',
             alert_failed_test : 'Field does not accept the following characters $',
+            alert_form_expired : 'The session has expired. Please refresh the webpage.', // 1.2.3
             alert_special_chars : 'Special characters were automatically removed. Try again.',
             authorization_required : 'Authorization required!',
             cookies_required : 'Browser cookies must be enabled to use this form.'
             
           }
-            				
-			var options = $.extend(defaults, options), obj = $(this), id = obj.attr('id'), auth_f = randomString(Math.random()*20), auth_c = randomString(Math.random()*20);
+            			
+			var options = $.extend(defaults, options), auth_f = randomString(Math.random()*20), auth_c = randomString(Math.random()*20), obj = $(this);
+            options = $.extend({id : obj.attr('id')}, options);
+            var id = options.id;
             if(options.require_cookies){  
                 $.cookie(options.cookie_name,auth_f + auth_c);
                 if($.cookie(options.cookie_name) != auth_f + auth_c){
@@ -72,7 +80,6 @@
                     return false;
                 }
             }    
-                
                 
                 if(options.html){
                     
@@ -194,6 +201,7 @@
                   }
                   
                   activate(id);
+                  
                 }
                
              function activate(id){  
@@ -318,6 +326,10 @@
                 }); 
                 }
                 
+                $('.' + options.validator_class).mouseup(function(){
+                    validate(id);
+                });
+                
                 $('#' + id + ' .abselectall').click(function(){
                     $(this).select().focus();
                 });
@@ -325,14 +337,20 @@
                 $('#' + id + ' .' + options.submit_class).mousedown(function(e){
                     var pos = $(this).position(),
                     right = pos.left+$(this).outerWidth(),
-                    bottom = pos.top+$(this).outerHeight();                   
-                    if(!$('#' + id + ' .' + auth_f).val() && (e.pageX > pos.left && e.pageX < right) && (e.pageY > pos.top && e.pageY < bottom)){
+                    os = $(this).offset(),
+                    bottom = os.top+$(this).outerHeight();                  
+                    if(!$('#' + id + ' .' + auth_f).val() && (e.pageX > pos.left && e.pageX < right) && (e.pageY > os.top && e.pageY < bottom)){
                         obj.append('<input type="hidden" id="' + auth_f + '" class="' + auth_f + '" value="' + auth_c + '" />');
-                    }                    
+                    }
+                    if(options.debug){
+                        $("#abdebug").after('<br />MouseDown:<br /><textarea id="abdebug-mousedown"></textarea>');
+                        $("#abdebug-mousedown").val(obj.html()); 
+                    }                      
                 });
                           
                 $('#' + id + ' .' + options.submit_class).mouseup(function(){
-                    all_fields.removeClass('aberror');
+                    all_fields.removeClass(options.error_class);
+                    if(options.alert_type == 'html') $('.aberror-helper').remove();
                     var formid = $("#" + id + " form").attr('id');
                     var pass = true;
                     pass = pass && $(this).is(':disabled') ? false : true;                    
@@ -362,149 +380,10 @@
                         }
                       }
                                                  
-                    $('#' + id + ' .abemail').each(function(){
-                        regexp = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i;
-                        if(!(regexp.test($(this).val()))){
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_email);
-                            $(this).addClass('aberror');
-                        }
-                    });
-                    
-                    $('#' + id + ' .aburl').each(function(){
-                        regexp = /^(https?|ftp|mms):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
-                        if(!(regexp.test($(this).val()))){
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_url);
-                            $(this).addClass('aberror');
-                        }
-                    });
-                    
-                    $('#' + id + ' .abrequired').each(function(){
-                        if($(this).val().length < 1){
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_required_field);
-                            $(this).addClass('aberror');
-                        }
-                    });
-                    
-                    $('#' + id + ' .ablength').each(function(){
-                        var req_range = $(this).attr('rel').split(','),
-                        range_bottom = (req_range[0]) ? req_range[0] : 1;
-                        
-                        if($(this).val().length > req_range[1] || $(this).val().length < req_range[0]){
-                            pass = false;
-                            if(req_range[1]){
-                               if(options.invalid_alert) alert(options.alert_invalid_length.replace('$',range_bottom +' - '+ req_range[1])); 
-                            } else {
-                              if(options.invalid_alert) alert(options.alert_invalid_length.replace('$',range_bottom));  
-                            }
-                            
-                            $(this).addClass('aberror');
-                        }
-                    });
-                    
-                    if(options.custom_regexp != ''){
-                       $('#' + id + ' .abcustom').each(function(){
-                        regexp = eval($(this).attr('rel'));
-                        if(!(regexp.test($(this).val()))){
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_content);
-                            $(this).addClass('aberror');
-                        }
-                    }); 
-                    }
-                    
-                    $('#' + id + ' .abnumbers').each(function(){
-                        if(isNaN(parseInt($(this).val()))){ // numbers
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_characters_numbers);
-                            $(this).addClass('aberror');  
-                        }
-                    });
-                    
-                    $('#' + id + ' .abletters').each(function(){
-                        var validChars = /^[a-zA-Z]+$/;
-                        if($(this).val().match(validChars)){
-                            // passed
-                        } else {
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_characters_letters);
-                            $(this).addClass('aberror');
-                        }
-                    });
-                    
-                    $('#' + id + ' .aballnum').each(function(){
-                        var invalidChars = /[\W_]/; // letters and numbers
-                        if(invalidChars.test($(this).val())){
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_characters);
-                            $(this).addClass('aberror');  
-                        }
-                    });
-                    
-                    $('#' + id + ' .abusername').each(function(){
-                        var invalidChars = /\W/; // letters, numbers, and underscores
-                        if(invalidChars.test($(this).val())){
-                            pass = false;
-                            if(options.invalid_alert) alert(options.alert_invalid_username);
-                            $(this).addClass('aberror');  
-                        }
-                    });
-                    
-                    $('#' + id + ' .abtest').each(function(){
-                        if($(this).attr('rel')){
-                            for(var i = 0; i < $(this).val().length; i++){
-                                if ($(this).attr('rel').indexOf($(this).val().charAt(i)) != -1){
-                                    pass = false;
-                                    if(options.invalid_alert) alert(options.alert_failed_test.replace('$',$(this).attr('rel')));
-                                    $(this).addClass('aberror');
-                                }
-                            }
-                        }
-                    });
-                    
-                    $('#' + id + ' .abnospecial').each(function(){
-                        var original = $(this).val();
-                        spec_chars = /\$|,|@|#|~|`|\%|\*|\^|\&|\(|\)|\+|\=|\[|\-|\_|\]|\[|\}|\{|\;|\:|\'|\"|\<|\>|\?|\||\\|\!|\$|\./g;
-                        $(this).val($(this).val().replace(spec_chars, ""));
-                        if($(this).val() != original){                          
-                           if(options.invalid_alert) {
-                            alert(options.alert_special_chars);
-                            pass = false;
-                           }
-                           $(this).addClass('aberror'); 
-                        }
-                    });
-                    
-                    $('#' + id + ' .abcookie').each(function(){
-                        //$.cookie()
-                    });
-                   
-                    if(options.custom_classes){
-                        var c_classes = options.custom_classes.split('{');
-                        c_classes.shift();
-                        for(var i in c_classes){
-                            var cclass = c_classes[i].split(':');                           
-                            var cname = cclass[0];
-                            myFunction = eval(cclass[1].replace('}',''));
-                            var alert_language = cclass[2];
-                            if($.isFunction(myFunction)){
-                                $('#' + id + ' .' + cname).each(function(){
-                                    var myCallback = myFunction($(this).attr('id'),$(this).val());
-                                    if($.type(myCallback) === 'string'){
-                                        if(options.invalid_alert){
-                                            alert(myCallback);
-                                            pass = false;
-                                        }
-                                        $(this).addClass('aberror');
-                                    }
-                                }); 
-                            }                                                  
-                        }
-                    }
+                    pass = validate(id);
                                         
                     if(pass){
+                        
                         $('#' + id + ' .' + auth_f).remove();
                                       
                         $('#' + id + ' input').each(function(){
@@ -523,7 +402,18 @@
                         } 
                                                
                         if(options.pluggable && $.isFunction(options.pluggable)){
-                            
+                            var runit = true;
+                            if(options.debug){
+                                var c = confirm("Debug Mode: Do you want to run the Pluggable function?");
+                                if(c != true){
+                                   runit = false;
+                                   if(options.debug){
+                                    $("#abdebug-mousedown").after('<br />MouseUp/Submit:<br /><textarea id="abdebug-submit"></textarea><br />');
+                                    $("#abdebug-submit").val(obj.html());
+                                    } 
+                                }
+                            }
+                            if(runit){
                             if(options.serialized && !options.json){
                                 
                                 return options.pluggable($(this).parent().serialize());
@@ -549,11 +439,24 @@
                                 return options.pluggable();
                                 
                             }                      
-                            
+                          }  
                         } else {
                            
-                           $(this).parent().submit(); 
+                           if(options.debug){
+                            $("#abdebug-mousedown").after('<br />MouseUp/Submit:<br /><textarea id="abdebug-submit"></textarea><br />');
+                            $("#abdebug-submit").val(obj.html());
+                           } else {
+                            if($.cookie('abclickonce')){
+                                options.clickonce = true;
+                            }
+                            $(this).parent().submit();
+                           }
                            
+                        }
+                    } else {
+                        if(options.clickonce){
+                            $.cookie('abclickonce',true);
+                            options.clickonce = false;
                         }
                     }
                     } else {
@@ -570,10 +473,170 @@
                        $('#'+id+' input, #'+id+' textarea, #'+id+' select').addClass('absubmitted'); 
                         
                     }
-                }); // mouseup                
+                }); // mouseup   
+                
+                if(options.debug) obj.after('<br />ABetterForm:<br /><textarea id="abdebug" class="abdebug"></textarea>');
+                $("#abdebug").val(obj.html());
+                
+                if(options.form_expires > 0){                    
+                    var expire_time = options.form_expires*60000;
+                    obj.delay(expire_time).hide('slow',function(){
+                       doError($(this), options.alert_form_expired);
+                       if(options.refresh_expired) window.location.reload(); 
+                    });
+                }           
 
-            } // activate 
-             
+            } // activate
+            
+            var validate = function(id){
+                pass = true;
+              $('#' + id + ' .abemail').each(function(){
+                        regexp = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i;
+                        if(!(regexp.test($(this).val()))){
+                            pass = false;
+                            doError($(this), options.alert_invalid_email);
+                        }
+                    });
+                    
+                    $('#' + id + ' .aburl').each(function(){
+                        regexp = /^(https?|ftp|mms):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
+                        if(!(regexp.test($(this).val()))){
+                            pass = false;
+                            doError($(this), options.alert_invalid_url);
+                        }
+                    });
+                    
+                    $('#' + id + ' .abrequired').each(function(){
+                        if($(this).val().length < 1){
+                            pass = false;
+                            doError($(this), options.alert_required_field)
+                        }
+                    });
+                    
+                    $('#' + id + ' .ablength').each(function(){
+                        var req_range = $(this).attr('rel').split(','),
+                        range_bottom = (req_range[0]) ? req_range[0] : 1;
+                        
+                        if($(this).val().length > req_range[1] || $(this).val().length < req_range[0]){
+                            pass = false;
+                            if(req_range[1]){
+                               doError($(this), options.alert_invalid_length.replace('$',range_bottom +' - '+ req_range[1])); 
+                            } else {
+                              doError($(this), options.alert_invalid_length.replace('$',range_bottom));  
+                            }
+                            
+                        }
+                    });
+                    
+                    if(options.custom_regexp != ''){
+                       $('#' + id + ' .abcustom').each(function(){
+                        regexp = eval($(this).attr('rel'));
+                        if(!(regexp.test($(this).val()))){
+                            pass = false;
+                            doError($(this), options.alert_invalid_content);
+                        }
+                    }); 
+                    }
+                    
+                    $('#' + id + ' .abnumbers').each(function(){
+                        if(isNaN(parseInt($(this).val()))){ // numbers
+                            pass = false;
+                            doError($(this), options.alert_invalid_characters_numbers);
+                        }
+                    });
+                    
+                    $('#' + id + ' .abletters').each(function(){
+                        var validChars = /^[a-zA-Z]+$/;
+                        if($(this).val().match(validChars)){
+                            // passed
+                        } else {
+                            pass = false;
+                            doError($(this), options.alert_invalid_characters_letters);
+                        }
+                    });
+                    
+                    $('#' + id + ' .aballnum').each(function(){
+                        var invalidChars = /[\W_]/; // letters and numbers
+                        if(invalidChars.test($(this).val())){
+                            pass = false;
+                            doError($(this), options.alert_invalid_characters);  
+                        }
+                    });
+                    
+                    $('#' + id + ' .abusername').each(function(){
+                        var invalidChars = /\W/; // letters, numbers, and underscores
+                        if(invalidChars.test($(this).val())){
+                            pass = false;
+                            doError($(this), options.alert_invalid_username); 
+                        }
+                    });
+                    
+                    $('#' + id + ' .abtest').each(function(){
+                        if($(this).attr('rel')){
+                            for(var i = 0; i < $(this).val().length; i++){
+                                if ($(this).attr('rel').indexOf($(this).val().charAt(i)) != -1){
+                                    pass = false;
+                                    doError($(this), options.alert_failed_test.replace('$',$(this).attr('rel')))
+                                }
+                            }
+                        }
+                    });
+                    
+                    $('#' + id + ' .abnospecial').each(function(){
+                        var original = $(this).val();
+                        spec_chars = /\$|,|@|#|~|`|\%|\*|\^|\&|\(|\)|\+|\=|\[|\-|\_|\]|\[|\}|\{|\;|\:|\'|\"|\<|\>|\?|\||\\|\!|\$|\./g;
+                        $(this).val($(this).val().replace(spec_chars, ""));
+                        if($(this).val() != original){
+                            pass = false;
+                            doError($(this), options.alert_special_chars);
+                        }
+                    });
+                    
+                    $('#' + id + ' .abcookie').each(function(){
+                        //TODO:Custom cookies
+                        //$.cookie()
+                    });
+                   
+                    if(options.custom_classes){
+                        var c_classes = options.custom_classes.split('{');
+                        c_classes.shift();
+                        for(var i in c_classes){
+                            var cclass = c_classes[i].split(':');                           
+                            var cname = cclass[0];
+                            myFunction = eval(cclass[1].replace('}',''));
+                            var alert_language = cclass[2];
+                            if($.isFunction(myFunction)){
+                                $('#' + id + ' .' + cname).each(function(){
+                                    var myCallback = myFunction($(this).attr('id'),$(this).val());
+                                    if($.type(myCallback) === 'string'){
+                                        pass = false;
+                                        doError($(this), myCallback);
+                                    }
+                                }); 
+                            }                                                  
+                        }
+                    }
+                    
+                    $.cookie('abvalid', pass);
+                    return pass;  
+            };
+            
+            var doError = function(object, alertText){
+                if(options.invalid_alert){
+                    switch(options.alert_type){
+                        
+                        case 'html':
+                        object.after('<div class="' + options.error_class + ' aberror-helper">' + options.alert_invalid_email + '</div>');
+                        break;
+                        
+                        default:
+                        alert(alertText);
+                        
+                    }
+                }
+                object.addClass(options.error_class);
+            };
+            
             function seq_dis(id, all_ids){
                 $('#'+id+' input, #'+id+' textarea, #'+id+' select').each(function(b){
                     
@@ -632,13 +695,13 @@
             
             function randomString(length) {
                 var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
-                if (! length) {
+                if (!length){
                     length = Math.floor(Math.random() * chars.length);
-                    }
-                    var str = '';
-                    for (var i = 0; i < length; i++) {
-                        str += chars[Math.floor(Math.random() * chars.length)];
-                    }
+                }
+                var str = '';
+                for (var i = 0; i < length; i++){
+                    str += chars[Math.floor(Math.random() * chars.length)];
+                }
                 return str;
             }
                                                         
