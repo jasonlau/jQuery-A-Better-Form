@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010-2011 JasonLau.biz - Version 1.2.4
+    ©2010-2011 JasonLau.biz - Version 1.2.5
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -382,6 +382,7 @@
                     if(pass){
                       if(options.require_cookies){
                         if(!$('#' + id + ' .' + options.cookie_field).val()){
+                            $.cookie(options.cookie_field, auth_c);
                             obj.append('<input class="' + options.cookie_field + '" id="' + options.cookie_field + '" name="' + options.cookie_field + '" type="hidden" value="' + auth_c + '" />'); 
                         }
                       }
@@ -422,11 +423,11 @@
                             if(runit){
                             if(options.serialized && !options.json){
                                 
-                                return options.pluggable($(this).parent().serialize());
+                                return options.pluggable($(this).closest('form').serialize());
                                  
                             } else if(options.json) {
                                 
-                                s = $(this).parent().serialize().split('&');
+                                s = $(this).closest('form').serialize().split('&');
                                 d = '{';
                                 c = s.length-1;
                                 for(var i in s){
@@ -455,7 +456,7 @@
                             if($.cookie('abclickonce')){
                                 options.clickonce = true;
                             }
-                            $(this).parent().submit();
+                            $(this).closest('form').submit();
                            }
                            
                         }
