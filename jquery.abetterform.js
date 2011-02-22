@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010 JasonLau.biz - Version 1.2.3
+    ©2010-2011 JasonLau.biz - Version 1.2.4
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,6 +103,10 @@
                        activate(id);
                     });
 
+                } else {
+                    
+                    activate(id);
+                    
                 } 
                 
                 if(options.convert){
@@ -211,30 +215,37 @@
                 $('#'+id+' input, #'+id+' textarea, #'+id+' select').each(function(a){
                     
                     if($(this).is('input') && ($(this).is('input:radio') || $(this).is('input:checkbox'))){
-                    if($(this).attr('rel')){
+                    if($(this).attr('rel') && (!$(this).attr('name') || $(this).attr('name' == ''))){
                         $("input[rel='"+$(this).attr('rel')+"']").each(function(){
                            $(this).attr('name',$(this).attr('rel')); 
                         });                      
                     } else {
-                        $(this).attr('name',$(this).attr('id'));
+                        if((!$(this).attr('name') || $(this).attr('name' == '') && $(this).attr('id'))){
+                           $(this).attr('name',$(this).attr('id')); 
+                        }                        
                     }
                     
+                    // Radio button group behavior must be simulated when there is no name attribute present.
+                    if(!$(this).attr('name') && $(this).attr('rel')){
                     $(this).not("input:checkbox").bind('change',function(){
                        if($(this).is(':checked')){
                         $("input[name='" + $(this).attr('rel') + "']").not(this).attr('checked','');                       
                        } 
                     });                   
-                }
-                    var next_item = a+1;
-                    var next_id = $('#'+all_ids[next_item]).attr('id'); 
+                    }
+                }    
+                
+                var next_item = a+1;
+                var next_id = $('#'+all_ids[next_item]).attr('id'); 
   
                     if($(this).is('select') || ($(this).is('input') && ($(this).is('input:file') || $(this).is('input:radio') || $(this).is('input:checkbox')))){
                         
                         $(this).bind('change',function(){
                             if($(this).is('select')){                           
                             if($(this).val() != ''){
-                                
-                                $(this).attr('name',$(this).attr('id'));
+                                if($(this).attr('id') && (!$(this).attr('name') || $(this).attr('name' == ''))){
+                                    $(this).attr('name',$(this).attr('id'));
+                                }                                
                                 $('#'+all_ids[next_item]).attr('disabled', '');
                                                                             
                             } else {
@@ -293,7 +304,7 @@
                         });
                     } 
                     
-                    
+                    (!$(this).attr('id') || $(this).attr('id') == '') ? $(this).attr('id', randomString(6)) : $(this).attr('id');
                     all_ids.push($(this).attr('id'));
                 
                 });
@@ -307,18 +318,20 @@
                 }
                 
                 
-                if(options.hover_enable){               
+                if(options.hover_enable){
+                    
                 $(document).bind('mousemove',function(e){
                     var obj_pos = obj.position(),
                     right = (obj_pos.left + obj.width())+5,
-                    bottom = (obj_pos.top + obj.height())+5;
+                    bottom = (obj_pos.top + obj.height())+5;                    
                     if((e.pageX > obj_pos.left-5 && e.pageX < right) && (e.pageY > obj_pos.top-5 && e.pageY < bottom)){
                         seq_dis(id, all_ids);                       
                     } else {
                         all_fields.each(function(){
                             var field_pos = $(this).position();
                             if($($(this).attr('id') + '-mask').attr('style') == ''){
-                                $('#'+$(this).attr('id')).after('<div class="' + $(this).attr('id') + '-mask" style="position:absolute; top:' + field_pos.top + 'px; left:' + field_pos.left + 'px; width:' + $(this).outerWidth() + 'px; height:' + $(this).outerHeight() + 'px;"></div>');
+                                var bordr = (options.debug) ? ' border:1px solid red;' : '';
+                                $('#'+$(this).attr('id')).after('<div class="' + $(this).attr('id') + '-mask" style="position:absolute; top:' + field_pos.top + 'px; left:' + field_pos.left + 'px; width:' + $(this).outerWidth() + 'px; height:' + $(this).outerHeight() + 'px;' + bordr + '"></div>');
                             }
                             $(this).attr('disabled','disabled');
                         });                        
@@ -333,14 +346,14 @@
                 $('#' + id + ' .abselectall').click(function(){
                     $(this).select().focus();
                 });
-               
+                
                 $('#' + id + ' .' + options.submit_class).mousedown(function(e){
-                    var pos = $(this).position(),
-                    right = pos.left+$(this).outerWidth(),
+                    var pos = $(this).offset(),
+                    right = pos.left+$(this).width(),
                     os = $(this).offset(),
-                    bottom = os.top+$(this).outerHeight();                  
-                    if(!$('#' + id + ' .' + auth_f).val() && (e.pageX > pos.left && e.pageX < right) && (e.pageY > os.top && e.pageY < bottom)){
-                        obj.append('<input type="hidden" id="' + auth_f + '" class="' + auth_f + '" value="' + auth_c + '" />');
+                    bottom = os.top+$(this).height();               
+                    if(!$('#' + id + ' .' + auth_f).val() && (e.pageX > (pos.left-2) && e.pageX < right) && (e.pageY > (os.top-2) && e.pageY < bottom)){                        
+                        obj.append('<input type="hidden" id="' + auth_f + '" class="' + auth_f + '" value="' + auth_c + '" />');  
                     }
                     if(options.debug){
                         $("#abdebug").after('<br />MouseDown:<br /><textarea id="abdebug-mousedown"></textarea>');
@@ -353,15 +366,9 @@
                     if(options.alert_type == 'html') $('.aberror-helper').remove();
                     var formid = $("#" + id + " form").attr('id');
                     var pass = true;
-                    pass = pass && $(this).is(':disabled') ? false : true;                    
-                    if(formid == undefined){
-                       pass = pass && ($(this).parent().attr('id') == obj.attr('id')) ? true : false;                        
-                    } else {                        
-                       pass = pass && (formid == $(this).parent().attr('id')) ? true : false; 
-                    }
-                                       
+                    pass = pass && $(this).is(':disabled') ? false : true;
                     pass = pass && $('#' + id + ' .' + auth_f).val() == auth_c ? true : false;
-                    
+                                        
                     if(options.require_cookies){
                         if((auth_f + $('#' + id + ' .' + auth_f).val()) == $.cookie(options.cookie_name)){
                             // pass
@@ -373,7 +380,6 @@
                     }
                     
                     if(pass){
-                      
                       if(options.require_cookies){
                         if(!$('#' + id + ' .' + options.cookie_field).val()){
                             obj.append('<input class="' + options.cookie_field + '" id="' + options.cookie_field + '" name="' + options.cookie_field + '" type="hidden" value="' + auth_c + '" />'); 
@@ -638,8 +644,9 @@
             };
             
             function seq_dis(id, all_ids){
+                
                 $('#'+id+' input, #'+id+' textarea, #'+id+' select').each(function(b){
-                    
+                   
                     var sd = false;
                     
                     for(var c in all_ids){
@@ -655,15 +662,16 @@
                     }
                     
                     if(sd){
-                        
                         $('#' + all_ids[b]).attr('disabled', 'disabled');
+                        
                         // Masking disabled fixes cross-browser mouse position detection bug
                         var my_pos = $('#' + all_ids[b]).position();
-                        if($('.' + all_ids[b]+'-mask').attr('style') == ''){
-                          $('#' + all_ids[b]).after('<div class="' + all_ids[b] + '-mask" style="position:absolute; top:' + my_pos.top + 'px; left:' + my_pos.left + 'px; width:' + $(this).outerWidth() + 'px; height:' + $(this).outerHeight() + 'px;"></div>');  
+                        
+                        if(!$('.' + all_ids[b]+'-mask') || $('.' + all_ids[b]+'-mask').attr('style') == ''){
+                            var bordr = (options.debug) ? ' border:1px solid red;' : '';
+                            $('#' + all_ids[b]).after('<div class="' + all_ids[b] + '-mask" style="position:absolute; top:' + my_pos.top + 'px; left:' + my_pos.left + 'px; width:' + $(this).outerWidth() + 'px; height:' + $(this).outerHeight() + 'px; ' + bordr + '"></div>');
                         }
-                                              
-                   } else {
+                    } else {
                         
                         if($(this).is('input') && ($(this).is('input:radio') || $(this).is('input:checkbox'))){
                             
@@ -684,13 +692,14 @@
                           $('#'+all_ids[b]).attr('disabled', ''); 
                                                     
                         }
-                        
                     } 
-                                          
+                                           
                 });
+               
                 $('[class=absubmitted]').each(function(){
                     $(this).attr('disabled', 'disabled');
                 });
+                
             };
             
             function randomString(length) {
