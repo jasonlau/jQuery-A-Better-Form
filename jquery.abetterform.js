@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010-2011 JasonLau.biz - Version 1.2.5
+    ©2010-2011 JasonLau.biz - Version 1.2.6
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -633,7 +633,7 @@
                     switch(options.alert_type){
                         
                         case 'html':
-                        object.after('<div class="' + options.error_class + ' aberror-helper">' + options.alert_invalid_email + '</div>');
+                        object.after('<div class="' + options.error_class + ' aberror-helper">' + alertText + '</div>');
                         break;
                         
                         default:
