@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010-2011 JasonLau.biz - Version 1.2.6
+    ©2010-2011 JasonLau.biz - Version 1.2.7
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -229,7 +229,7 @@
                     if(!$(this).attr('name') && $(this).attr('rel')){
                     $(this).not("input:checkbox").bind('change',function(){
                        if($(this).is(':checked')){
-                        $("input[name='" + $(this).attr('rel') + "']").not(this).attr('checked','');                       
+                        $("input[name='" + $(this).attr('rel') + "']").not(this).prop({checked:false});                       
                        } 
                     });                   
                     }
@@ -243,10 +243,10 @@
                         $(this).bind('change',function(){
                             if($(this).is('select')){                           
                             if($(this).val() != ''){
-                                if($(this).attr('id') && (!$(this).attr('name') || $(this).attr('name' == ''))){
+                                if($(this).attr('id') && (!$(this).attr('name') || $(this).attr('name') == '')){
                                     $(this).attr('name',$(this).attr('id'));
                                 }                                
-                                $('#'+all_ids[next_item]).attr('disabled', '');
+                                $('#'+all_ids[next_item]).prop({disabled:false});
                                                                             
                             } else {
                                 
@@ -260,9 +260,9 @@
                                 var cb_id = $(this).attr('id');
                                 $('#' + id + ' input:checkbox').not(this).each(function(){
                                     if($("#" + cb_id).is(':checked')){
-                                        $(this).attr('checked','checked');
+                                        $(this).prop({checked:true});
                                     } else {
-                                        $(this).attr('checked','');
+                                        $(this).prop({checked:false});
                                     }
                                 });
                             }
@@ -295,7 +295,7 @@
                                     
                                 }
                                                                 
-                                $('#' + all_ids[next_item]).attr('disabled', ''); 
+                                $('#' + all_ids[next_item]).prop({disabled:false}); 
                                 
                             }
                             
@@ -311,8 +311,8 @@
                 
                 if(options.sequential_disable){
                     
-                   all_fields.attr('disabled', 'disabled');
-                   all_fields.first().attr('disabled', '');
+                   all_fields.prop({disabled:true});
+                   all_fields.first().prop({disabled:false});
                    seq_dis(id, all_ids);
                     
                 }
@@ -333,7 +333,7 @@
                                 var bordr = (options.debug) ? ' border:1px solid red;' : '';
                                 $('#'+$(this).attr('id')).after('<div class="' + $(this).attr('id') + '-mask" style="position:absolute; top:' + field_pos.top + 'px; left:' + field_pos.left + 'px; width:' + $(this).outerWidth() + 'px; height:' + $(this).outerHeight() + 'px;' + bordr + '"></div>');
                             }
-                            $(this).attr('disabled','disabled');
+                            $(this).prop({disabled:true});
                         });                        
                     }                                       
                 }); 
@@ -395,10 +395,7 @@
                                       
                         $('#' + id + ' input').each(function(){
                             if($(this).is(':hidden')){
-                              $(this).attr({
-                                disabled : '',
-                                name : $(this).attr('id')
-                                });  
+                              $(this).attr({name : $(this).attr('id')}).prop({disabled:false});
                             }
                         });
                         
@@ -476,7 +473,7 @@
                         
                     }
                     if(options.clickonce){
-                       $(this).attr('disabled','disabled');
+                       $(this).prop({disabled:true});
                        $('#'+id+' input, #'+id+' textarea, #'+id+' select').addClass('absubmitted'); 
                         
                     }
@@ -663,7 +660,7 @@
                     }
                     
                     if(sd){
-                        $('#' + all_ids[b]).attr('disabled', 'disabled');
+                        $('#' + all_ids[b]).prop({disabled:true});
                         
                         // Masking disabled fixes cross-browser mouse position detection bug
                         var my_pos = $('#' + all_ids[b]).position();
@@ -678,7 +675,7 @@
                             
                           $('[id=' + $(this).attr('id') + ']').each(function(){
                             
-                            $(this).attr('disabled', '');
+                            $(this).prop({disabled:false});
                             $("." + $(this).attr('id') + "-mask").remove();
                             
                           }); 
@@ -690,7 +687,7 @@
                           });
                           
                           $('.' + all_ids[b] + '-mask').remove();  
-                          $('#'+all_ids[b]).attr('disabled', ''); 
+                          $('#'+all_ids[b]).prop({disabled:false}); 
                                                     
                         }
                     } 
@@ -698,7 +695,7 @@
                 });
                
                 $('[class=absubmitted]').each(function(){
-                    $(this).attr('disabled', 'disabled');
+                    $(this).prop({disabled:true});
                 });
                 
             };
