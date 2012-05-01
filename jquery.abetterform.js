@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010-2011 JasonLau.biz - Version 1.2.7
+    ©2010-2011 JasonLau.biz - Version 1.2.8
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -215,12 +215,12 @@
                 $('#'+id+' input, #'+id+' textarea, #'+id+' select').each(function(a){
                     
                     if($(this).is('input') && ($(this).is('input:radio') || $(this).is('input:checkbox'))){
-                    if($(this).attr('rel') && (!$(this).attr('name') || $(this).attr('name' == ''))){
+                    if($(this).attr('rel') && (!$(this).attr('name') || $(this).attr('name') == '')){
                         $("input[rel='"+$(this).attr('rel')+"']").each(function(){
                            $(this).attr('name',$(this).attr('rel')); 
                         });                      
                     } else {
-                        if((!$(this).attr('name') || $(this).attr('name' == '') && $(this).attr('id'))){
+                        if((!$(this).attr('name') || $(this).attr('name') == '' && $(this).attr('id'))){
                            $(this).attr('name',$(this).attr('id')); 
                         }                        
                     }
@@ -299,7 +299,9 @@
                                 
                             }
                             
-                            if(options.sequential_disable){ seq_dis(id, all_ids); } 
+                            if(options.sequential_disable){ 
+                                seq_dis(id, all_ids); 
+                            } 
                                                    
                         });
                     } 
@@ -511,7 +513,7 @@
                     });
                     
                     $('#' + id + ' .abrequired').each(function(){
-                        if($(this).val().length < 1){
+                        if($(this).val() == ""){
                             pass = false;
                             doError($(this), options.alert_required_field)
                         }
