@@ -3,7 +3,7 @@
 /* 
     A Better Form - A jQuery plugin
     ==================================================================
-    ©2010-2011 JasonLau.biz - Version 1.2.8
+    ©2010-2012 JasonLau.biz - Version 1.2.9
     ==================================================================
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -703,7 +703,7 @@
             };
             
             function randomString(length) {
-                var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.split('');
+                var chars = 'abcdefghiklmnopqrstuvwxyz'.split('');
                 if (!length){
                     length = Math.floor(Math.random() * chars.length);
                 }
