@@ -351,9 +351,9 @@
                 
                 $('#' + id + ' .' + options.submit_class).mousedown(function(e){
                     var pos = $(this).offset(),
-                    right = pos.left+$(this).width(),
+                    right = pos.left+$(this).outerWidth(),
                     os = $(this).offset(),
-                    bottom = os.top+$(this).height();               
+                    bottom = os.top+$(this).outerHeight();               
                     if(!$('#' + id + ' .' + auth_f).val() && (e.pageX > (pos.left-2) && e.pageX < right) && (e.pageY > (os.top-2) && e.pageY < bottom)){                        
                         obj.append('<input type="hidden" id="' + auth_f + '" class="' + auth_f + '" value="' + auth_c + '" />');  
                     }
